@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta name="theme-color" content="#173f35">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kleanma Caixa">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#173f35">
+<title>Kleanma | Caixa Diário</title>
+<style>
+:root{--green:#173f35;--green2:#26745b;--bg:#f4f5f1;--card:#fff;--text:#18231f;--muted:#68756f;--line:#e0e6e1;--gold:#e8bd66;--red:#b33b3b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+header{background:var(--green);color:white;padding:24px 18px 20px;border-radius:0 0 24px 24px}
+.wrap{max-width:760px;margin:auto;padding:0 14px}header .wrap{padding:0 4px}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.8;font-weight:700}
+h1{font-size:25px;line-height:1.15;margin:6px 0 7px}header p{margin:0;color:#dce9e2;font-size:14px}
+.tabs{display:flex;gap:8px;margin:16px 0;position:sticky;top:0;padding:8px 0;background:var(--bg);z-index:5}
+.tab{flex:1;border:1px solid var(--line);border-radius:12px;background:white;padding:12px 8px;font-weight:700;color:var(--muted);font-size:14px}
+.tab.active{background:var(--green);color:white;border-color:var(--green)}
+.page{display:none}.page.active{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0;box-shadow:0 2px 10px #10251a08}
+h2{font-size:17px;margin:0 0 13px}h3{font-size:14px;margin:0 0 8px}
+label{display:block;font-size:13px;font-weight:650;margin:0 0 6px;color:#34443c}
+input{width:100%;border:1px solid #ccd6cf;background:#fff;border-radius:11px;padding:13px 12px;font-size:16px;color:var(--text);outline:none}
+input:focus{border-color:var(--green2);box-shadow:0 0 0 3px #26745b1c}
+.field{margin:12px 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+button{cursor:pointer;font:inherit}.primary{width:100%;background:var(--green);color:#fff;border:0;border-radius:12px;padding:14px;font-weight:750;font-size:15px;margin-top:8px}
+.secondary{background:white;border:1px solid var(--line);color:var(--green);border-radius:10px;padding:10px 12px;font-weight:700}
+.danger{color:var(--red);border-color:#f0cccc}
+.hero{background:var(--green);color:white;border-radius:16px;padding:17px;margin:12px 0}
+.hero .label{font-size:12px;color:#d4e4db}.hero .amount{font-size:30px;font-weight:800;letter-spacing:-.04em;margin:4px 0}.hero .sub{font-size:12px;color:#d4e4db}
+.statrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.statrow:last-child{border-bottom:0}
+.statrow span{font-size:14px}.statrow strong{font-size:15px;text-align:right;font-variant-numeric:tabular-nums}
+.muted{color:var(--muted);font-size:12px;line-height:1.45}.pill{display:inline-block;background:#e8f3ec;color:#226247;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:750}
+.progress{height:9px;background:#e7ece8;border-radius:99px;overflow:hidden;margin:10px 0}.progress>div{height:100%;background:var(--green2);width:0%}
+.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.result{border:1px solid var(--line);border-radius:13px;padding:12px}.result small{display:block;color:var(--muted);font-size:12px}.result strong{display:block;margin-top:4px;font-size:17px}
+.history-item{padding:13px 0;border-bottom:1px solid var(--line)}.history-item:last-child{border-bottom:0}.history-top{display:flex;justify-content:space-between;gap:10px}.history-top strong{font-size:14px}.history-item p{font-size:12px;color:var(--muted);margin:5px 0 0}
+.empty{padding:22px 8px;text-align:center;color:var(--muted);font-size:14px}
+.footer{text-align:center;padding:18px 8px;color:var(--muted);font-size:11px}
+@media(min-width:600px){.grid{grid-template-columns:1fr 1fr}.card{padding:20px}.wrap{padding:0 20px}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><div class="eyebrow">Kleanma Refrigeração</div><h1>Caixa diário</h1><p>Fechamento rápido, despesas, pró-labore e divisão do resultado.</p></div></header>
+<main class="wrap">
+<nav class="tabs" aria-label="Navegação">
+<button class="tab active" data-tab="calc">Calculadora</button>
+<button class="tab" data-tab="history">Histórico</button>
+<button class="tab" data-tab="settings">Metas</button>
+<button class="tab" data-tab="division">Divisão</button>
+</nav>
+<section id="calc" class="page active">
+<div class="card">
+<h2>1. Entradas e despesas de hoje</h2>
+<div class="field"><label for="date">Data do fechamento</label><input id="date" type="date"></div>
+<div class="field"><label for="gross">Total recebido hoje (R$)</label><input id="gross" type="number" min="0" step=".01" inputmode="decimal" placeholder="0,00" readonly></div>
+<div class="card" style="padding:12px;margin:8px 0;background:#f9fbf8"><h3>Adicionar recebimentos do dia</h3>
+<div class="grid"><div class="field"><label for="incomeEntry">Valor recebido (R$)</label><input id="incomeEntry" type="number" min="0" step=".01" inputmode="decimal" placeholder="Ex.: 300,00"></div><div class="field"><label for="incomeNote">Descrição (opcional)</label><input id="incomeNote" type="text" placeholder="Ex.: conserto geladeira"></div></div>
+<button type="button" class="secondary" id="addIncome">+ Incluir recebimento</button><div id="incomeList" class="muted" style="margin-top:8px">Nenhum recebimento incluído.</div></div>
+<div class="grid">
+<div class="field"><label for="parts">Peças e materiais — total (R$)</label><input id="parts" type="number" min="0" step=".01" inputmode="decimal" placeholder="0,00" readonly></div>
+<div class="card" style="padding:12px;margin:8px 0;background:#f9fbf8"><h3>Adicionar peça/material</h3>
+<div class="grid"><div class="field"><label for="partsEntry">Valor (R$)</label><input id="partsEntry" type="number" min="0" step=".01" inputmode="decimal" placeholder="Ex.: 150,00"></div><div class="field"><label for="partsNote">Descrição (opcional)</label><input id="partsNote" type="text" placeholder="Ex.: compressor"></div></div>
+<button type="button" class="secondary" id="addParts">+ Incluir despesa</button><div id="partsList" class="muted" style="margin-top:8px">Nenhuma despesa incluída.</div></div>
+<div class="field"><label for="fuel">Gasolina e deslocamentos — total (R$)</label><input id="fuel" type="number" min="0" step=".01" inputmode="decimal" placeholder="0,00" readonly></div>
+<div class="card" style="padding:12px;margin:8px 0;background:#f9fbf8"><h3>Adicionar gasolina/deslocamento</h3>
+<div class="grid"><div class="field"><label for="fuelEntry">Valor (R$)</label><input id="fuelEntry" type="number" min="0" step=".01" inputmode="decimal" placeholder="Ex.: 150,00"></div><div class="field"><label for="fuelNote">Descrição (opcional)</label><input id="fuelNote" type="text" placeholder="Ex.: abastecimento"></div></div>
+<button type="button" class="secondary" id="addFuel">+ Incluir despesa</button><div id="fuelList" class="muted" style="margin-top:8px">Nenhuma despesa incluída.</div></div>
+<div class="field"><label for="other">Outras despesas, taxas e impostos — total (R$)</label><input id="other" type="number" min="0" step=".01" inputmode="decimal" placeholder="0,00" readonly></div>
+<div class="card" style="padding:12px;margin:8px 0;background:#f9fbf8"><h3>Adicionar outra despesa</h3>
+<div class="grid"><div class="field"><label for="otherEntry">Valor (R$)</label><input id="otherEntry" type="number" min="0" step=".01" inputmode="decimal" placeholder="Ex.: 150,00"></div><div class="field"><label for="otherNote">Descrição (opcional)</label><input id="otherNote" type="text" placeholder="Ex.: taxa ou imposto"></div></div>
+<button type="button" class="secondary" id="addOther">+ Incluir despesa</button><div id="otherList" class="muted" style="margin-top:8px">Nenhuma despesa incluída.</div></div>
+<div class="field"><label for="prolabore">Pró-labore pago hoje (R$)</label><input id="prolabore" type="number" min="0" step=".01" inputmode="decimal" placeholder="0,00"></div>
+</div>
+<p class="muted">Inclua cada despesa apenas uma vez. Se comprou uma peça no cartão, registre o custo da peça aqui; não desconte novamente quando repuser o dinheiro da caixinha. A calculadora separa automaticamente 40% do resultado após despesas para formar o pró-labore mensal. No dia 20, registre aqui o valor efetivamente pago; essa retirada será informativa e não será descontada novamente do resultado do dia.</p>
+<button class="primary" id="calculate">Calcular divisão</button>
+</div>
+<div class="hero"><div class="label">Resultado após despesas, antes do pró-labore</div><div class="amount" id="net">R$ 0,00</div><div class="sub" id="status">Preencha os valores acima para calcular.</div></div>
+<div class="card">
+<h2>2. Divisão automática do resultado</h2>
+<div class="result-grid"><div class="result"><small>Pró-labore reservado · 40%</small><strong id="prolaboreAdd">R$ 0,00</strong></div><div class="result"><small>Saldo após separar pró-labore</small><strong id="afterProlabore">R$ 0,00</strong></div></div>
+<div class="result-grid">
+<div class="result"><small>Reserva de emergência · 50%*</small><strong id="reserveAdd">R$ 0,00</strong></div>
+<div class="result"><small>Capital de giro · 30%*</small><strong id="workingAdd">R$ 0,00</strong></div>
+<div class="result"><small>Lucro extra · 20%*</small><strong id="extraAdd">R$ 0,00</strong></div>
+<div class="result"><small>Lucro extra por sócio</small><strong id="eachAdd">R$ 0,00</strong></div>
+</div>
+<p class="muted" style="margin-top:12px">*Primeiro, 40% do resultado após despesas vai para a meta mensal de pró-labore de R$ 3.400. Dos 60% restantes, a divisão é 50% reserva, 30% capital de giro e 20% lucro extra. Se a meta de pró-labore do mês já estiver completa, essa parcela deixa de ser reservada e fica disponível para a divisão do saldo.</p>
+<div class="statrow"><span>Saldo projetado da reserva</span><strong id="reserveBalance">R$ 0,00</strong></div>
+<div class="progress"><div id="progressBar"></div></div>
+<div class="muted" id="progressText">Meta de emergência: R$ 10.000,00</div>
+<button class="primary" id="save">Salvar fechamento no histórico</button>
+</div>
+<div class="card">
+<h2>3. Meta mensal do pró-labore</h2>
+<div class="statrow"><span>Seu pró-labore mensal</span><strong id="ownerTarget">R$ 1.700,00</strong></div>
+<div class="statrow"><span>Pró-labore mensal do parceiro</span><strong id="partnerTarget">R$ 1.700,00</strong></div>
+<div class="statrow"><span>Meta total dos dois sócios</span><strong id="monthlyTarget">R$ 3.400,00</strong></div>
+<div class="statrow"><span>Acumulado automaticamente neste mês</span><strong id="paidMonthDisplay">R$ 0,00</strong></div>
+<div class="statrow"><span>Falta para completar a meta</span><strong id="remainingPay">R$ 3.400,00</strong></div>
+<div class="progress"><div id="payProgressBar"></div></div>
+<div class="muted" id="payProgressText">R$ 0,00 de R$ 3.400,00 · 0% da meta mensal</div>
+<p class="muted"><strong>O pró-labore é um valor fixo, não uma porcentagem do faturamento.</strong> A meta mensal total é R$ 3.400: R$ 1.700 para cada sócio. As porcentagens de reserva, capital de giro e lucro extra só são aplicadas ao saldo que sobra depois de despesas e pró-labore. O valor reservado no cálculo atual já aparece provisoriamente nesta meta. Ao salvar o fechamento, ele será acumulado no mês automaticamente.</p>
+</div>
+<div class="card">
+<h2>4. Caixinha de peças</h2>
+<div class="field"><label for="partsBox">Saldo atual da caixinha (R$)</label><input id="partsBox" type="number" min="0" step=".01" inputmode="decimal" value="0"></div>
+<div class="field"><label for="cardLimit">Limite do cartão de peças (R$)</label><input id="cardLimit" type="number" min="0" step=".01" inputmode="decimal" value="1000"></div>
+<p class="muted">Controle à parte o dinheiro que precisa estar disponível para pagar a fatura. A caixinha de peças não é lucro nem reserva de emergência.</p>
+<button class="secondary" id="saveSettings">Salvar metas e saldos</button>
+</div>
+</section>
+<section id="history" class="page">
+<div class="card"><h2>Fechamentos salvos neste celular</h2><p class="muted">Os registros ficam guardados neste navegador. Se limpar os dados do navegador ou trocar de aparelho, exporte uma cópia antes.</p><div id="historyList" class="empty">Nenhum fechamento salvo ainda.</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><button class="secondary" id="export">Exportar CSV</button><button class="secondary danger" id="clearHistory">Apagar histórico</button></div></div>
+</section>
+<section id="division" class="page">
+<div class="card"><h2>Resumo mensal da divisão</h2>
+<p class="muted">Escolha o mês para somar todos os fechamentos salvos, incluindo resultados positivos e prejuízos.</p>
+<div class="field"><label for="summaryMonth">Mês de referência</label><input id="summaryMonth" type="month"></div>
+<div class="hero" style="margin:10px 0"><div class="label">Resultado líquido acumulado no mês</div><div class="amount" id="monthNet">R$ 0,00</div><div class="sub" id="monthCount">0 fechamentos registrados</div></div>
+<div id="monthlySummary"></div>
+</div>
+<div class="card"><h2>Divisão do fechamento atual</h2>
+<p class="muted">Valores calculados para os dados preenchidos agora, antes de salvar.</p>
+<div id="divisionSummary"></div>
+</div>
+<div class="card"><h2>Como funciona a divisão</h2>
+<p class="muted">Esta aba mostra os valores calculados em reais para o fechamento atual, sem precisar converter as porcentagens manualmente.</p>
+<p class="muted">Se a meta mensal do pró-labore for completada, o cálculo deixa de separar dinheiro para ela. Todo o resultado restante passa a ser distribuído entre reserva, capital de giro e lucro extra. A parcela da reserva é limitada à meta de emergência; excedentes são redistribuídos entre capital de giro e lucro extra.</p></div>
+</section>
+<section id="settings" class="page">
+<div class="card"><h2>Metas financeiras</h2>
+<div class="field"><label for="reserveGoal">Meta da reserva de emergência (R$)</label><input id="reserveGoal" type="number" min="0" step=".01" value="10000"></div>
+<div class="field"><label for="reserveCurrent">Saldo atual da reserva de emergência (R$)</label><input id="reserveCurrent" type="number" min="0" step=".01" value="0"></div>
+<div class="field"><label for="payEach">Pró-labore mensal por sócio (R$)</label><input id="payEach" type="number" min="0" step=".01" value="1700"></div>
+<button class="primary" id="saveAllSettings">Salvar configurações</button>
+<p class="muted">A divisão padrão do saldo positivo é 50% para reserva, 30% para capital de giro e 20% para lucro extra. Os valores calculados são sugestões de destinação, não substituem o controle de obrigações e contas a pagar.</p></div>
+</section>
+<div class="footer">Kleanma Refrigeração · Controle financeiro simples</div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const num=id=>Math.max(0,Number($(id).value)||0);
+const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+let current=null;
+let history=JSON.parse(localStorage.getItem('kleanmaHistory')||'[]');
+let settings=JSON.parse(localStorage.getItem('kleanmaSettings')||'{}');
+$('date').value=today();if($('summaryMonth'))$('summaryMonth').value=today().slice(0,7);
+const dailyItems={income:[],parts:[],fuel:[],other:[]};
+function renderItems(type){
+ const list=$(type+'List');if(!list)return;
+ list.innerHTML='';const items=dailyItems[type];
+ if(!items.length){list.textContent=type==='income'?'Nenhum recebimento incluído.':'Nenhuma despesa incluída.';return}
+ items.forEach((item,index)=>{
+  const row=document.createElement('div');row.style.cssText='display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #e0e6e1';
+  const desc=document.createElement('span');desc.textContent=(item.note?item.note+' — ':'')+money(item.amount);
+  const del=document.createElement('button');del.type='button';del.className='secondary danger';del.textContent='Remover';del.style.padding='5px 8px';del.addEventListener('click',()=>{items.splice(index,1);syncItems(type)});
+  row.append(desc,del);list.append(row);
+ });
+ const sum=document.createElement('div');sum.style.cssText='font-weight:750;padding-top:8px;color:#173f35';sum.textContent='Total: '+money(items.reduce((a,x)=>a+x.amount,0));list.append(sum);
+}
+function syncItems(type){
+ const field=type==='income'?'gross':type;
+ $(field).value=dailyItems[type].reduce((a,x)=>a+x.amount,0).toFixed(2);
+ renderItems(type);calc();
+}
+function addItem(type){
+ const input=$(type==='income'?'incomeEntry':type+'Entry');
+ const noteInput=$(type==='income'?'incomeNote':type+'Note');
+ const amount=Number(input.value);
+ if(!Number.isFinite(amount)||amount<=0){alert('Digite um valor maior que zero.');input.focus();return}
+ dailyItems[type].push({amount,note:noteInput.value.trim()});input.value='';noteInput.value='';syncItems(type);
+}
+function loadSettings(){
+ $('reserveGoal').value=settings.goal??10000;$('reserveCurrent').value=settings.reserve??0;$('payEach').value=settings.payEach??1700;
+ $('partsBox').value=settings.partsBox??0;$('cardLimit').value=settings.cardLimit??1000;
+}
+function calc(){
+ const gross=num('gross'),parts=num('parts'),fuel=num('fuel'),other=num('other'),paidToday=num('prolabore');
+ const costs=parts+fuel+other,net=gross-costs,positive=Math.max(0,net);
+ const goal=num('reserveGoal'),reserve=num('reserveCurrent'),need=Math.max(0,goal-reserve);
+ const target=num('payEach')*2,monthKey=($('date').value||today()).slice(0,7); const paidMonth=(settings.prolaboreMonth===monthKey?Number(settings.prolaboreAccumulated||0):0);
+ const prolaboreNeed=Math.max(0,target-paidMonth);
+ const prolaboreAdd=Math.min(positive*.4,prolaboreNeed);
+ const remaining=Math.max(0,positive-prolaboreAdd);
+ const rawReserve=remaining*.5, reserveAdd=Math.min(rawReserve,need), excess=Math.max(0,rawReserve-reserveAdd);
+ const working=remaining*.3+excess/2,extra=remaining*.2+excess/2;
+ current={date:$('date').value||today(),monthKey,gross,parts,fuel,other,prolabore:paidToday,costs,net,prolaboreAdd,remaining,reserveAdd,working,extra,each:extra/2,reserveBalance:reserve+reserveAdd,goal,reserveStart:reserve,paidMonth,monthlyTarget:target,partsBox:num('partsBox'),cardLimit:num('cardLimit')};
+ $('net').textContent=money(net);$('net').style.color=net<0?'#ffb4b4':'white';
+ $('status').textContent=net<0?'Resultado negativo: não reserve pró-labore nem distribua lucro.':net===0?'Sem resultado disponível após despesas.':'40% do resultado é separado automaticamente para o pró-labore, até completar a meta mensal.';
+ $('prolaboreAdd').textContent=money(prolaboreAdd);$('afterProlabore').textContent=money(remaining);
+ $('reserveAdd').textContent=money(reserveAdd);$('workingAdd').textContent=money(working);$('extraAdd').textContent=money(extra);$('eachAdd').textContent=money(extra/2);$('reserveBalance').textContent=money(reserve+reserveAdd);
+ const pct=goal>0?Math.min(100,(reserve+reserveAdd)/goal*100):100;$('progressBar').style.width=pct+'%';$('progressText').textContent=`${money(reserve+reserveAdd)} de ${money(goal)} · ${pct.toFixed(1).replace('.',',')}% da meta`;
+ $('monthlyTarget').textContent=money(target);$('paidMonthDisplay').textContent=money(Math.min(target,paidMonth+prolaboreAdd));$('remainingPay').textContent=money(Math.max(0,target-paidMonth-prolaboreAdd)); const payPct=target>0?Math.min(100,(paidMonth+prolaboreAdd)/target*100):100; $('payProgressBar').style.width=payPct+'%'; $('payProgressText').textContent=`${money(Math.min(target,paidMonth+prolaboreAdd))} de ${money(target)} · ${payPct.toFixed(1).replace('.',',')}% da meta mensal`;
+}
+function renderMonthlySummary(){
+ const input=$('summaryMonth'); if(!input)return;
+ const month=input.value || today().slice(0,7);
+ const rows=history.filter(x=>String(x.date||'').slice(0,7)===month);
+ const sum=key=>rows.reduce((acc,x)=>acc+(Number(x[key])||0),0);
+ const net=sum('net'),gross=sum('gross'),costs=sum('costs'),prolabore=sum('prolaboreAdd'),reserve=sum('reserveAdd'),working=sum('working'),extra=sum('extra'),loss=rows.reduce((acc,x)=>acc+Math.max(0,-(Number(x.net)||0)),0),positive=rows.reduce((acc,x)=>acc+Math.max(0,Number(x.net)||0),0);
+ $('monthNet').textContent=money(net);$('monthNet').style.color=net<0?'#ffb4b4':'white';
+ $('monthCount').textContent=`${rows.length} fechamento${rows.length===1?'':'s'} registrado${rows.length===1?'':'s'} · ${money(positive)} em resultados positivos · ${money(loss)} em prejuízos`;
+ const el=$('monthlySummary');el.innerHTML='';
+ const add=(label,val,negative=false)=>{const row=document.createElement('div');row.className='statrow';const a=document.createElement('span');a.textContent=label;const b=document.createElement('strong');b.textContent=money(val);if(negative||val<0)b.style.color='#b33b3b';row.append(a,b);el.append(row)};
+ add('Faturamento/entradas recebidas',gross);
+ add('Custos e despesas registrados',costs);
+ add('Resultado líquido do mês',net,net<0);
+ add('Prejuízos acumulados (soma dos dias negativos)',loss,loss>0);
+ add('Pró-labore reservado no mês',prolabore);
+ add('Aportes à reserva de emergência',reserve);
+ add('Capital de giro acumulado',working);
+ add('Lucro extra acumulado',extra);
+ add('Lucro extra por sócio',extra/2);
+ if(!rows.length){const p=document.createElement('p');p.className='muted';p.textContent='Nenhum fechamento salvo neste mês. Salve os fechamentos diários na aba Calculadora para aparecerem aqui.';el.prepend(p)}
+}
+function renderDivision(x){
+ if(!x)return;
+ const el=$('divisionSummary'); if(!el)return; el.innerHTML='';
+ const add=(label,val,pct)=>{const row=document.createElement('div');row.className='statrow';const a=document.createElement('span');a.textContent=label;const b=document.createElement('strong');b.textContent=`${money(val)} · ${pct.toFixed(1).replace('.',',')}% do resultado`;row.append(a,b);el.append(row)};
+ add('Resultado líquido após despesas',x.net,100);
+ const addSimple=(label,val)=>{const row=document.createElement('div');row.className='statrow';const a=document.createElement('span');a.textContent=label;const b=document.createElement('strong');b.textContent=money(val);row.append(a,b);el.append(row)};
+ el.innerHTML='';
+ addSimple('Resultado líquido após despesas',x.net);
+ addSimple('Pró-labore reservado neste fechamento',x.prolaboreAdd);
+ addSimple('Reserva de emergência — aporte de hoje',x.reserveAdd);
+ addSimple('Saldo projetado total da reserva',x.reserveBalance);
+ addSimple('Capital de giro — aporte de hoje',x.working);
+ addSimple('Lucro extra total',x.extra);
+ addSimple('Lucro extra para cada sócio',x.each);
+}
+function persistSettings(){
+ settings={...settings,goal:num('reserveGoal'),reserve:num('reserveCurrent'),payEach:num('payEach'),partsBox:num('partsBox'),cardLimit:num('cardLimit')};
+ localStorage.setItem('kleanmaSettings',JSON.stringify(settings));calc();
+}
+function rebuildAccumulatorsFromHistory(){
+ const month=($('date').value||today()).slice(0,7);
+ const monthly=history.filter(x=>String(x.date||'').slice(0,7)===month);
+ settings={...settings,
+   prolaboreMonth:month,
+   prolaboreAccumulated:Math.min(num('payEach')*2,monthly.reduce((a,x)=>a+(Number(x.prolaboreAdd)||0),0)),
+   reserve:Math.min(num('reserveGoal'),history.reduce((a,x)=>a+(Number(x.reserveAdd)||0),0))
+ };
+ localStorage.setItem('kleanmaSettings',JSON.stringify(settings));
+ $('reserveCurrent').value=settings.reserve;
+}
+function renderHistory(){
+ const el=$('historyList');if(!history.length){el.className='empty';el.textContent='Nenhum fechamento salvo ainda.';return}
+ el.className='';el.innerHTML='';
+ history.slice().reverse().forEach((x)=>{const div=document.createElement('div');div.className='history-item';const top=document.createElement('div');top.className='history-top';const title=document.createElement('strong');title.textContent=new Date(x.date+'T12:00:00').toLocaleDateString('pt-BR');const amount=document.createElement('strong');amount.textContent=money(x.net);amount.style.color=x.net<0?'#b33b3b':'#26745b';top.append(title,amount);const p=document.createElement('p');p.textContent=`Entradas ${money(x.gross)} · Despesas ${money(x.costs)} · Pró-labore reservado ${money(x.prolaboreAdd||0)} · Reserva ${money(x.reserveAdd)} · Giro ${money(x.working)} · Extra ${money(x.extra)}`;const del=document.createElement('button');del.className='secondary danger';del.textContent='Excluir este fechamento';del.style.marginTop='10px';del.addEventListener('click',()=>{if(!confirm(`Excluir somente o fechamento de ${new Date(x.date+'T12:00:00').toLocaleDateString('pt-BR')} (${money(x.net)})? Os totais serão recalculados com os registros restantes.`))return;const index=history.findIndex(y=>y.savedAt===x.savedAt&&y.date===x.date&&y.gross===x.gross&&y.net===x.net);if(index>=0)history.splice(index,1);localStorage.setItem('kleanmaHistory',JSON.stringify(history));rebuildAccumulatorsFromHistory();renderHistory();renderMonthlySummary();calc();alert('Fechamento excluído. As metas e os totais foram recalculados com os registros restantes.');});div.append(top,p,del);el.append(div)})
+}
+$('addIncome').addEventListener('click',()=>addItem('income'));
+$('addParts').addEventListener('click',()=>addItem('parts'));
+$('addFuel').addEventListener('click',()=>addItem('fuel'));
+$('addOther').addEventListener('click',()=>addItem('other'));
+$('calculate').addEventListener('click',calc);$('summaryMonth').addEventListener('change',renderMonthlySummary);
+['prolabore','partsBox','cardLimit','reserveGoal','reserveCurrent','payEach'].forEach(id=>$(id).addEventListener('input',calc));
+$('date').addEventListener('change',()=>{Object.keys(dailyItems).forEach(type=>{dailyItems[type]=[];syncItems(type)});$('prolabore').value='';calc();});
+$('save').addEventListener('click',()=>{calc();if(!current)return;const savedNet=current.net;history.push({...current,savedAt:new Date().toISOString()});localStorage.setItem('kleanmaHistory',JSON.stringify(history));if(savedNet>=0){const month=current.monthKey;const previous=settings.prolaboreMonth===month?Number(settings.prolaboreAccumulated||0):0;settings={...settings,reserve:current.reserveBalance,partsBox:current.partsBox,cardLimit:current.cardLimit,prolaboreMonth:month,prolaboreAccumulated:Math.min(current.monthlyTarget,previous+current.prolaboreAdd)};$('reserveCurrent').value=settings.reserve;localStorage.setItem('kleanmaSettings',JSON.stringify(settings));}renderHistory();renderMonthlySummary();Object.keys(dailyItems).forEach(type=>{dailyItems[type]=[];renderItems(type);$(type==='income'?'gross':type).value='0.00'});$('prolabore').value='';calc();alert(savedNet<0?'Prejuízo salvo no histórico em vermelho. Nenhum aporte de pró-labore ou reserva foi contabilizado.':'Fechamento salvo. O pró-labore reservado foi somado automaticamente à meta mensal.');});
+$('saveSettings').addEventListener('click',()=>{persistSettings();alert('Saldos salvos.');});
+$('saveAllSettings').addEventListener('click',()=>{persistSettings();alert('Metas salvas.');});
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===b.dataset.tab));if(b.dataset.tab==='history')renderHistory();if(b.dataset.tab==='division')renderMonthlySummary();}));
+$('export').addEventListener('click',()=>{if(!history.length){alert('Ainda não há fechamentos para exportar.');return}const cols=['date','gross','parts','fuel','other','costs','net','prolaboreAdd','remaining','reserveAdd','working','extra','reserveBalance'];const csv=[cols.join(';'),...history.map(x=>cols.map(k=>String(x[k]??'').replace('.',',')).join(';'))].join('\n');const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='kleanma-fechamentos.csv';a.click();URL.revokeObjectURL(a.href)});
+$('clearHistory').addEventListener('click',()=>{if(confirm('Apagar todos os fechamentos salvos? Os totais calculados a partir deles serão atualizados, mas as metas configuradas serão mantidas.')){history=[];localStorage.removeItem('kleanmaHistory');rebuildAccumulatorsFromHistory();['gross','parts','fuel','other','prolabore'].forEach(id=>$(id).value='');calc();renderHistory();renderMonthlySummary();alert('Histórico apagado. Os acumulados dos fechamentos foram recalculados; as metas configuradas foram mantidas.');}});
+loadSettings();calc();renderHistory();renderMonthlySummary();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+</script>
+</body></html>
